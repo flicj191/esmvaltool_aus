@@ -1,0 +1,115 @@
+# ESMValTool -test...
+# rainfall anomaly..
+---
+documentation:
+  description: build recipe 1
+  title: This is an example recipe build
+
+  authors:
+    - chun_felicity
+
+datasets:
+  - {dataset: ACCESS-ESM1-5, project: CMIP6, mip: Amon, grid: gn, exp: historical, ensemble: r1i1p1f1}
+  # - {dataset: ERA-Interim, project: OBS6, type: reanaly, version: 1, tier: 3, mip: day} ##obs/ reanaly?
+
+
+preprocessors:
+  aus_full: &aus_full
+    extract_region:
+      start_longitude: 110
+      end_longitude: 160 #add from 155
+      start_latitude: -45
+      end_latitude: -9
+    extract_time:
+        start_year: 1900
+        start_month: 1
+        start_day: 1
+        end_year: 2010
+        end_month: 12
+        end_day: 31
+    extract_season:
+      season: AMJJAS
+    mask_landsea:
+      mask_out: sea      
+    convert_units: 
+      units: mm day-1
+    area_statistics:
+      operator: mean ## why mean? sum unsure of freq? --regrid time? ##factor over area
+    annual_statistics:
+      operator: sum #sum yearly #then get this average? in script??
+    # climate_statistics: #dumb#
+    #   operator: mean
+
+  aus_ref: &aus_ref
+    <<: *aus_full
+    extract_time:
+        start_year: 1961
+        start_month: 1
+        start_day: 1
+        end_year: 1990
+        end_month: 12
+        end_day: 31
+
+  north_full:
+    <<: *aus_full
+    extract_region: &north_region
+      start_longitude: 110
+      end_longitude: 165
+      start_latitude: -26
+      end_latitude: -9
+    extract_season:
+      season: ONDJFM
+
+  north_ref:
+    <<: *aus_ref
+    extract_region:
+      <<: *north_region
+    extract_season:
+      season: ONDJFM
+
+  se_full:
+    <<: *aus_full
+    extract_region: &se_region
+      start_longitude: 135
+      end_longitude: 165
+      start_latitude: -45
+      end_latitude: -33
+  se_ref:
+    <<: *aus_ref
+    extract_region:
+      <<: *se_region
+
+   
+
+diagnostics:
+  check_north_pr: 
+    description: rainfall anomalies for north australia
+    variables:
+      pr_north_ref:
+        short_name: pr
+        preprocessor: north_ref
+      pr_north_full:
+        short_name: pr
+        preprocessor: north_full
+    scripts: 
+      plt_script:
+        script: /home/189/fc6164/esmValTool/test_plotting.py
+        colour: blue
+    
+  check_se_pr: 
+    description: rainfall anomalies for south east australia
+    variables:
+      pr_se_ref: ##use split last or index to get ref cube in script?
+        short_name: pr
+        preprocessor: se_ref
+      pr_se_full:
+        short_name: pr
+        preprocessor: se_full
+    scripts: 
+      plt_script:
+        script: /home/189/fc6164/esmValTool/test_plotting.py
+        colour: orange
+ 
+
+
+ 
