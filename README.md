@@ -1,2 +1,2 @@
 ## esmvaltool_aus
-- Australia focuessed receipes
+- Australia focused receipes
