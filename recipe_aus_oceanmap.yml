@@ -1,0 +1,88 @@
+# ESMValTool -test...
+# 
+---
+documentation:
+  description: build recipe 2
+  title: This is an example recipe build
+
+  authors:
+    - chun_felicity
+
+datasets:
+  - {dataset: ACCESS-OM2, activity: OMIP ,project: CMIP6, mip: Omon, grid: gn, exp: omip2, ensemble: r1i1p1f1}
+  # - {dataset: ERA-Interim, project: OBS6, type: reanaly, version: 1, tier: 3, mip: day} ##obs/ reanaly?
+  # - {dataset: CSIRO-BOM-ACCESS1-3, project: CORDEX, mip: mon, exp: rcp45, ensemble: r1i1p1}
+  # - {dataset: GFDL-ESM4, activity: ScenarioMIP, project: CMIP6, exp: ssp585, ensemble: r1i1p1f1, mip: Omon, grid: gr}
+
+
+preprocessors:  
+  ## preproc for varable around aus -sst, ocean acidity ##different dataset
+  ocean_map:
+    extract_time:
+      start_year: 200 ##longer time period
+      start_month: 1
+      start_day: 1
+      end_year: 300
+      end_month: 12
+      end_day: 31
+    extract_region:
+      start_longitude: 105
+      end_longitude: 165
+      start_latitude: -50
+      end_latitude: -15
+    mask_landsea:
+      mask_out: land 
+    linear_trend:
+      coordinate: time
+      
+  ocean_decadal:
+    extract_time:
+      start_year: 200 
+      start_month: 1
+      start_day: 1
+      end_year: 300
+      end_month: 12
+      end_day: 31
+    extract_region:
+      start_longitude: 110
+      end_longitude: 160
+      start_latitude: -45
+      end_latitude: -9
+    # linear_trend:
+    #   coordinate: time
+    mask_landsea:
+      mask_out: land 
+    decadal_statistics:
+      operator: mean
+
+diagnostics:
+
+  aus_map:
+    description: mapping aus ocean
+    variables:
+      aus_sst:
+        short_name: tos
+        preprocessor: ocean_map
+      # aus_so:
+      #   short_name: so ##sea surface salinity #extract level? ##ph ocean acidity- extract level?
+      #   preprocessor: ocean_map
+        
+    scripts: 
+      map:
+        script: /home/189/fc6164/esmValTool/map_plotting.py   ##variable groups..
+        mask: land ##for sst, ocean acidity around australia .. ##get param in script
+
+  aus_decade:
+    description: decade means
+    variables:
+      decade_sst: ##must be underscore split [1]
+        short_name: tos
+        preprocessor: ocean_decadal
+
+    scripts: # null ## build trend decadal -linear?
+      map:
+        script: /home/189/fc6164/esmValTool/map_plotting.py
+        mask: ignore ## must exist, land/sea valid  
+
+
+ 
