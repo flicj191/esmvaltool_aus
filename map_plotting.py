@@ -89,6 +89,8 @@ def plot_ocean_map(nf, name, mask,preproc):
 
     ticks ={'ticks':None}
     var = list(ds.keys())[0]
+    cmap='RdBu'
+    vminmax={}
     if preproc=='ocean_decadal': ## preprocessor_decadal
         ds = trend_val(ds,var)
         var = 'val_trend'
@@ -96,13 +98,20 @@ def plot_ocean_map(nf, name, mask,preproc):
     if preproc=='decilemap':
         ds= decile_mapdata(ds,var)
         var = 'val'
-        ticks ={'ticks':list(range(1,10,1))}
+        vminmax = {'vmin':0,'vmax':10}
+        ticks ={'ticks':list(range(1,10,1))} # if decile category map
+        cmap = plt.get_cmap('RdBu', 10)
         
-
-    cx = cx.axes.contourf(ds['lon'],ds['lat'],ds[var],transform=crs.PlateCarree(),cmap='coolwarm')
+    if 'time' in list(ds.dims):
+        logger.info(" time dimension exists, sum along time")
+        ds = ds.sum(dim='time') ##sum time
+    
+    # cx = cx.axes.contourf(ds['lon'],ds['lat'],ds[var],transform=crs.PlateCarree(),cmap='coolwarm') #contours?
+    cx = cx.axes.pcolormesh(ds['lon'],ds['lat'],ds[var],transform=crs.PlateCarree(),**vminmax,cmap=cmap)
     plt.colorbar(cx, shrink=0.7,**ticks)
     
     # naem from variable group? get time? model?
+    name = Path(nf).stem
     cx.axes.set_title(f'{name}')
     
     return fig
